@@ -11,20 +11,41 @@ function login() {
 
 
     const handleLogin = async () => {
-        if (!email || !password) {
-            setError('Email and password are required.');
-            return;
+        try {
+            setError('')
+
+            if (!email || !password) {
+                setError('Email and password are required.');
+                return;
+            }
+
+            const { user, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (error) {
+                alert('Error logging in: ' + error.message);
+            }
+            window.location.href = '/profile';
+        }
+        catch (error) {
+            setError(error.message);
         }
 
-        const { user, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
+    };
+    const handleGithubLogin = async () => {
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: "github"
+            });
 
-        if (error) {
-            alert('Error logging in: ' + error.message);
-        } else {
-            window.location.href = '/profile';
+            if (error) {
+                throw error;
+            }
+
+        } catch (error) {
+            setError(error.message);
         }
     };
 
@@ -66,15 +87,24 @@ function login() {
                         </div>
                     </div>
                     <div>
-                        <Link
+                        <button
                             onClick={handleLogin}
-                            href="/profile"
+
 
                             type="submit"
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            className="group relative w-full flex justify-center py-2 px-3 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                             Log in
-                        </Link>
+                        </button>
+                        <button
+                            onClick={handleGithubLogin}
+
+
+                            type="submit"
+                            className="group mt-10 relative w-full flex justify-center py-2 px-3 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                            Log in with github
+                        </button>
                     </div>
                 </form>
                 {error && <p className="mt-2 text-center text-sm text-red-600">{error}</p>}
